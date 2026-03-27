@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'sristy421/java-app:latest'
+        SONAR_HOST_URL = 'http://host.docker.internal:9000'
+
     }
 
     stages {
@@ -45,7 +47,7 @@ pipeline {
             }
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar -Dsonar.projectKey=java-cicd-app -Dsonar.host.url=http://host.docker.internal:9000'
+                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar -Dsonar.projectKey=java-cicd-app'
                 }
             }
         }
