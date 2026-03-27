@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'sristy421/java-app:latest'
-        SONAR_HOST_URL = 'http://host.docker.internal:9000'
 
     }
 
