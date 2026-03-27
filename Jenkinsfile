@@ -13,43 +13,61 @@ pipeline {
         }
 
         stage('Build') {
+            agent {
+                docker {
+                    image 'maven:3.9.11-eclipse-temurin-17'
+                    reuseNode true
+                }
+            }
             steps {
-                bat 'mvn clean package -DskipTests'
+                sh 'mvn clean package -DskipTests'
             }
         }
 
         stage('Test') {
+            agent {
+                docker {
+                    image 'maven:3.9.11-eclipse-temurin-17'
+                    reuseNode true
+                }
+            }
             steps {
-                bat 'mvn test'
+                sh 'mvn test'
             }
         }
 
         stage('SonarQube Analysis') {
+            agent {
+                docker {
+                    image 'maven:3.9.11-eclipse-temurin-17'
+                    reuseNode true
+                }
+            }
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    bat 'mvn sonar:sonar -Dsonar.projectKey=java-cicd-app -Dsonar.host.url=http://sonarqube:9000'
+                    sh 'mvn sonar:sonar -Dsonar.projectKey=java-cicd-app -Dsonar.host.url=http://sonarqube:9000'
                 }
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t %DOCKER_IMAGE% .'
+                sh 'docker build -t $DOCKER_IMAGE .'
             }
         }
 
         stage('Push Docker Image') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    bat 'docker login -u %DOCKER_USER% -p %DOCKER_PASS%'
-                    bat 'docker push %DOCKER_IMAGE%'
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh 'docker push $DOCKER_IMAGE'
                 }
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                bat 'kubectl apply -f deployment.yaml'
+                sh 'kubectl apply -f deployment.yaml'
             }
         }
     }
